@@ -1,0 +1,17 @@
+# Default values for ui.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/retail-store-sample-app/ui
+  tag:
+resources:
+  requests:
+    cpu: 128m
+    memory: 512Mi
+  limits:
+    cpu:
+    memory: 512Mi
+swan_ingress:
+  swan_host: www.swanpyaetun.com
+  swan_acm_certificate_arn: arn:aws:acm:ap-southeast-1:655355946217:certificate/fe3c2710-f428-4285-abf5-cdbac143ef92

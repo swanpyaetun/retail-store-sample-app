@@ -1,0 +1,28 @@
+name: cart
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/cart/**'
+    paths-ignore:
+      - 'swan_kubernetes/swan_helm/swan_microservices/**/values.yaml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/cart/**'
+    paths-ignore:
+      - 'swan_kubernetes/swan_helm/swan_microservices/**/values.yaml'
+  workflow_dispatch:
+
+jobs:
+  swan_docker:
+    uses: ./.github/workflows/swan_docker.yml
+    with:
+      swan_aws_region: "ap-southeast-1"
+      swan_ecr_repository: "retail-store-sample-app/cart"
+      swan_dockerfile_path: "src/cart/Dockerfile"
+    secrets:
+      SWAN_CI_IAM_ROLE_ARN: ${{ secrets.SWAN_CI_IAM_ROLE_ARN }}

@@ -1,0 +1,14 @@
+# Default values for checkout.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/retail-store-sample-app/checkout
+  tag:
+resources:
+  requests:
+    cpu: 128m
+    memory: 256Mi
+  limits:
+    cpu:
+    memory: 256Mi

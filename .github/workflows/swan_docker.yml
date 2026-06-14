@@ -1,0 +1,47 @@
+name: Reusable Workflow for Building and Pushing Docker Image to ECR
+
+on:
+  workflow_call:
+    inputs:
+      swan_aws_region:
+        required: true
+        type: string
+      swan_ecr_repository:
+        required: true
+        type: string
+      swan_dockerfile_path:
+        required: true
+        type: string
+    secrets:
+      SWAN_CI_IAM_ROLE_ARN:
+        required: true
+
+jobs:
+  swan_docker:
+    name: Build and Push Docker Image to ECR
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # id-token write permission is needed to use OIDC
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.SWAN_CI_IAM_ROLE_ARN }}
+          aws-region: ${{ inputs.swan_aws_region }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          push: true
+          file: ${{ inputs.swan_dockerfile_path }}
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.swan_ecr_repository }}:${{ github.sha }}
