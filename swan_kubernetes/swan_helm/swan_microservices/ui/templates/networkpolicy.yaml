@@ -12,7 +12,12 @@ spec:
       app.kubernetes.io/component: service
       app.kubernetes.io/owner: retail-store-sample
   policyTypes:
+  - Ingress
   - Egress
+  ingress:
+  - ports:
+    - protocol: TCP
+      port: 80
   egress:
   - to:
     - namespaceSelector:
