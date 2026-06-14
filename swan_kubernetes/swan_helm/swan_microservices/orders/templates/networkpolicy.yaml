@@ -1,0 +1,66 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: orders
+  namespace: {{ .Values.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: orders
+      app.kubernetes.io/instance: orders
+      app.kubernetes.io/component: service
+      app.kubernetes.io/owner: retail-store-sample
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: default
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ui
+          app.kubernetes.io/instance: ui
+          app.kubernetes.io/component: service
+          app.kubernetes.io/owner: retail-store-sample
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: default
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: checkout
+          app.kubernetes.io/instance: checkout
+          app.kubernetes.io/component: service
+          app.kubernetes.io/owner: retail-store-sample
+    ports:
+    - protocol: TCP
+      port: 80
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: default
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: orders
+          app.kubernetes.io/instance: orders
+          app.kubernetes.io/component: postgresql
+          app.kubernetes.io/owner: retail-store-sample
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: default
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: orders
+          app.kubernetes.io/instance: orders
+          app.kubernetes.io/component: rabbitmq
+          app.kubernetes.io/owner: retail-store-sample
+    ports:
+    - protocol: TCP
+      port: 5672
