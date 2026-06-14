@@ -6,15 +6,13 @@ on:
       - main
     paths:
       - 'src/orders/**'
-    paths-ignore:
-      - 'swan_kubernetes/swan_helm/swan_microservices/**/values.yaml'
+      - '!swan_kubernetes/swan_helm/swan_microservices/**/values.yaml'
   pull_request:
     branches:
       - main
     paths:
       - 'src/orders/**'
-    paths-ignore:
-      - 'swan_kubernetes/swan_helm/swan_microservices/**/values.yaml'
+      - '!swan_kubernetes/swan_helm/swan_microservices/**/values.yaml'
   workflow_dispatch:
 
 jobs:
