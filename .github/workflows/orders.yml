@@ -15,6 +15,6 @@ jobs:
     with:
       swan_aws_region: "ap-southeast-1"
       swan_ecr_repository: "retail-store-sample-app/orders"
-      swan_dockerfile_path: "src/orders/Dockerfile"
+      swan_context_path: "src/orders"
     secrets:
       SWAN_CI_IAM_ROLE_ARN: ${{ secrets.SWAN_CI_IAM_ROLE_ARN }}

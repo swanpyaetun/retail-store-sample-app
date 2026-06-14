@@ -9,7 +9,7 @@ on:
       swan_ecr_repository:
         required: true
         type: string
-      swan_dockerfile_path:
+      swan_context_path:
         required: true
         type: string
     secrets:
@@ -42,6 +42,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
+          context: ${{ inputs.swan_context_path }}
           push: true
-          file: ${{ inputs.swan_dockerfile_path }}
           tags: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.swan_ecr_repository }}:${{ github.sha }}
