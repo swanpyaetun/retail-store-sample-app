@@ -4,6 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: checkout
+  namespace: {{ .Values.namespace }}
   labels:
     helm.sh/chart: checkout-1.6.1
     app.kubernetes.io/name: checkout

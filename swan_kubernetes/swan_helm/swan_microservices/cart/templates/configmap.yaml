@@ -4,6 +4,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: carts
+  namespace: {{ .Values.namespace }}
 data:
   RETAIL_CART_PERSISTENCE_PROVIDER: dynamodb
   RETAIL_CART_PERSISTENCE_DYNAMODB_TABLE_NAME: Items
