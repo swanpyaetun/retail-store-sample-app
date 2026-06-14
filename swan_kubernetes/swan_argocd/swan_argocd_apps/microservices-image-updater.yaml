@@ -11,14 +11,14 @@ spec:
   writeBackConfig:
     method: "git:secret:argocd/git-creds"
     gitConfig:
-      repository: https://github.com/swanpyaetun/retail-store-sample-app.git
+      repository: https://github.com/swanpyaetun/swan_retail-store-sample-app.git
       branch: main
       writeBackTarget: helmvalues:./values.yaml
   applicationRefs:
     - namePattern: cart
       images:
         - alias: cart
-          imageName: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/retail-store-sample-app/cart
+          imageName: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/swan_retail-store-sample-app/cart
           manifestTargets:
             helm:
               name: image.repository
@@ -26,7 +26,7 @@ spec:
     - namePattern: catalog
       images:
         - alias: catalog
-          imageName: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/retail-store-sample-app/catalog
+          imageName: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/swan_retail-store-sample-app/catalog
           manifestTargets:
             helm:
               name: image.repository
@@ -34,7 +34,7 @@ spec:
     - namePattern: checkout
       images:
         - alias: checkout
-          imageName: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/retail-store-sample-app/checkout
+          imageName: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/swan_retail-store-sample-app/checkout
           manifestTargets:
             helm:
               name: image.repository
@@ -42,7 +42,7 @@ spec:
     - namePattern: orders
       images:
         - alias: orders
-          imageName: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/retail-store-sample-app/orders
+          imageName: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/swan_retail-store-sample-app/orders
           manifestTargets:
             helm:
               name: image.repository
@@ -50,7 +50,7 @@ spec:
     - namePattern: ui
       images:
         - alias: ui
-          imageName: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/retail-store-sample-app/ui
+          imageName: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/swan_retail-store-sample-app/ui
           manifestTargets:
             helm:
               name: image.repository

@@ -7,7 +7,7 @@ metadata:
 spec:
   generators:
     - git:
-        repoURL: https://github.com/swanpyaetun/retail-store-sample-app.git
+        repoURL: https://github.com/swanpyaetun/swan_retail-store-sample-app.git
         revision: main
         directories:
           - path: swan_kubernetes/swan_helm/swan_microservices/*
@@ -19,7 +19,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/swanpyaetun/retail-store-sample-app.git
+        repoURL: https://github.com/swanpyaetun/swan_retail-store-sample-app.git
         targetRevision: main
         path: '{{path}}'
         helm:
