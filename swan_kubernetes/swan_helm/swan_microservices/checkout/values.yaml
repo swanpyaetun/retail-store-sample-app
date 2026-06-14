@@ -5,7 +5,7 @@
 namespace: default
 image:
   repository: 655355946217.dkr.ecr.ap-southeast-1.amazonaws.com/retail-store-sample-app/checkout
-  tag:
+  tag: 52bac2a2f99e7d3fe5b642692124b3d33733726b
 resources:
   requests:
     cpu: 128m
