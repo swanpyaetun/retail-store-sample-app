@@ -17,7 +17,7 @@ spec:
   ingress:
   - ports:
     - protocol: TCP
-      port: 80
+      port: 8080
   egress:
   - to:
     - namespaceSelector:
@@ -58,4 +58,4 @@ spec:
           app.kubernetes.io/owner: retail-store-sample
     ports:
     - protocol: TCP
-      port: 80
+      port: 8080
