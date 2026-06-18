@@ -1,180 +1,129 @@
-![Banner](./docs/images/banner.png)
+# swanpyaetun/swan_retail-store-sample-app
 
-<div align="center">
-  <div align="center">
+# Deploying Microservices Application to EKS with GitHub Actions and Argo CD
 
-[![Stars](https://img.shields.io/github/stars/aws-containers/retail-store-sample-app)](Stars)
-![GitHub License](https://img.shields.io/github/license/aws-containers/retail-store-sample-app?color=green)
-![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Faws-containers%2Fretail-store-sample-app%2Frefs%2Fheads%2Fmain%2F.release-please-manifest.json&query=%24%5B%22.%22%5D&label=release)
-![GitHub Release Date](https://img.shields.io/github/release-date/aws-containers/retail-store-sample-app)
+![](swan_docs/swan_images/architecture_diagram.png)
 
-  </div>
+- Tools used: GitHub Actions, AWS, ECR, EKS, Helm, Argo CD, Argo CD Image Updater, AWS Load Balancer Controller, External DNS, Karpenter
+- Deploy microservices application to EKS with GitHub Actions and Argo CD
+- Set up GitHub Actions reusable workflow for building and pushing Docker images to ECR
+- Set up 5 GitHub Actions CI/CD pipelines for microservices, which use reusable workflow to build and push Docker images to private ECR repositories
+- Use GitHub Actions repository secret to store sensitive values
+- Use GitHub App, so that Argo CD Image Updater can push to GitHub
+- Use CI IAM role which only allows a specific GitHub repository in a specific GitHub organization authenticate to AWS using GitHub OIDC provider
+- Secure GitHub Actions authentication to AWS by using short-lived OIDC tokens with automatic expiration, instead of storing long-lived IAM user credentials in GitHub
+- Use private ECR Repositories to store container images
+- Create ec2nodeclass and nodepool for Karpenter to scale EKS nodes
+- Prioritize spot capacity type with fallback option to on-demand in Karpenter to optimize cost
+- Remove EKS nodes that are idle or underutilized, and replace with cheaper node to optimize cost
+- Use Helm to package Kubernetes manifests into Helm charts
+- Create "default-deny" network policy, and "allow-dns-access" network policy in "platform" Helm chart
+- Deny all ingress and egress traffic in the namespace with "default-deny" network policy
+- Allow the pods in the namespace to access coredns pods with "allow-dns-access" network policy
+- Secure the application by creating least privilege network policies
+- Create ingress in "ui" Helm chart
+- Create internet-facing ALB for Kubernetes ingress with AWS Load Balancer Controller
+- Use ip mode in ingress to route traffic directly to pod ip addresses
+- Use ACM certificate in ingress to enable https
+- Redirect http to https in ingress
+- Create DNS records in Route 53 public hosted zone with External DNS
+- Use Argo CD App-of-Apps pattern
+- Deploy "platform" application, "microservices" applicationset, and "microservices" imageupdater with "root" application in Argo CD
+- Deploy "platform" Helm chart with "platform" application in Argo CD
+- Generate multiple Argo CD applications for each microservice Helm chart with "microservices" applicationset
+- Enable Argo CD to automatically synchronize with git
+- Validate the manifests before applying in Argo CD
+- Create new resources first before pruning old resources in Argo CD
+- Monitor ECR for new container image tags, and update the container image tags in the git repository with Argo CD Image Updater
 
-  <strong>
-  <h2>AWS Containers Retail Sample</h2>
-  </strong>
-</div>
+## Table of Contents
 
-This is a sample application designed to illustrate various concepts related to containers on AWS. It presents a sample retail store application including a product catalog, shopping cart and checkout.
+- [1. Prerequisites](#1-see-prerequisites)
+- [2. Technical Details](#2-see-technical-details)
+- [3. Instructions](#3-instructions)
+- [4. Additional Information](#4-additional-information)
 
-It provides:
+## 1. See [Prerequisites](swan_docs/swan_docs/swan_prerequisites.md)
 
-- A demo store-front application with themes, pages to show container and application topology information, generative AI chat bot and utility functions for experimentation and demos.
-- An optional distributed component architecture using various languages and frameworks
-- A variety of different persistence backends for the various components like MariaDB (or MySQL), DynamoDB and Redis
-- The ability to run in different container orchestration technologies like Docker Compose, Kubernetes etc.
-- Pre-built container images for both x86-64 and ARM64 CPU architectures
-- All components instrumented for Prometheus metrics and OpenTelemetry OTLP tracing
-- Support for Istio on Kubernetes
-- Load generator which exercises all of the infrastructure
+## 2. See [Technical Details](swan_docs/swan_docs/swan_technical_details.md)
 
-See the [features documentation](./docs/features.md) for more information.
+## 3. Instructions
 
-**This project is intended for educational purposes only and not for production use**
+Run "Provision AWS Infrastructure using Terraform" pipeline in [https://github.com/swanpyaetun/swan_eks-infrastructure-for-retail-store-sample-app](https://github.com/swanpyaetun/swan_eks-infrastructure-for-retail-store-sample-app) to create EKS infrastructure.
+<br><br>
 
-![Screenshot](/docs/images/screenshot.png)
+Run CI/CD pipelines for microservices to build and push Docker images to private ECR repositories.<br>
+CI/CD pipelines for microservices can be triggered in 2 ways:
+1. The CI/CD pipelines run when a direct push is made to the main branch.
+2. The CI/CD pipelines run when a user manually triggers them.
 
-## Application Architecture
+To view ECR basic scanning results, in AWS Management Console, go to ap-southeast-1 region -> Elastic Container Registry -> Private registry -> Repositories. Choose a repository that has container image that you want to view ECR basic scanning result for. Choose an image that you want to view ECR basic scanning result for. Under "Scanning and vulnerabilities", you will see ECR basic scanning result for that image.
+<br><br>
 
-The application has been deliberately over-engineered to generate multiple de-coupled components. These components generally have different infrastructure dependencies, and may support multiple "backends" (example: Carts service supports MongoDB or DynamoDB).
-
-![Architecture](/docs/images/architecture.png)
-
-| Component                  | Language | Container Image                                                             | Helm Chart                                                                        | Description                             |
-| -------------------------- | -------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------- |
-| [UI](./src/ui/)            | Java     | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-ui)       | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-ui-chart)       | Store user interface                    |
-| [Catalog](./src/catalog/)  | Go       | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-catalog)  | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-catalog-chart)  | Product catalog API                     |
-| [Cart](./src/cart/)        | Java     | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-cart)     | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-cart-chart)     | User shopping carts API                 |
-| [Orders](./src/orders)     | Java     | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-orders)   | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-orders-chart)   | User orders API                         |
-| [Checkout](./src/checkout) | Node     | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-checkout) | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-checkout-chart) | API to orchestrate the checkout process |
-
-## Quickstart
-
-The following sections provide quickstart instructions for various platforms.
-
-### Docker
-
-This deployment method will run the application as a single container on your local machine using `docker`.
-
-Pre-requisites:
-
-- Docker installed locally
-
-Run the container:
-
+```bash
+aws eks update-kubeconfig --region ap-southeast-1 --name swan_production_eks_cluster --role-arn arn:aws:iam::655355946217:role/swan_production_eks_cluster-swan_eks_cluster_admin_iam_role
 ```
-docker run -it --rm -p 8888:8080 public.ecr.aws/aws-containers/retail-store-sample-ui:1.0.0
+This command updates ~/.kube/config so that "swan_production_eks_cluster" EKS cluster can be accessed using kubectl, assuming "swan_production_eks_cluster-swan_eks_cluster_admin_iam_role" IAM role.
+<br><br>
+
+```bash
+cd ~/Desktop/
+git clone git@github.com:swanpyaetun/swan_retail-store-sample-app.git
 ```
+Go to ~/Desktop/ and clone the [https://github.com/swanpyaetun/swan_retail-store-sample-app](https://github.com/swanpyaetun/swan_retail-store-sample-app) repository.
+<br><br>
 
-Open the frontend in a browser window:
-
+```bash
+kubectl apply -f ~/Desktop/swan_retail-store-sample-app/swan_kubernetes/swan_karpenter/
 ```
-http://localhost:8888
+This command creates "default" ec2nodeclass and "default" nodepool.
+<br><br>
+
+Go to "Settings" -> Developer settings -> GitHub Apps. Select "swan-argocd-image-updater" GitHub App. Go to "General". You will see "githubAppID".<br>
+Go to "Settings" -> Integrations -> Applications -> Installed GitHub Apps. Select "swan-argocd-image-updater" GitHub App by clicking "Configure". Look at the URL. The number behind https://github.com/settings/installations/ is "githubAppInstallationID".<br>
+Go to "Settings" -> Developer settings -> GitHub Apps. Select "swan-argocd-image-updater" GitHub App. Go to "General" -> Private keys. Click "Generate a private key". The private key will be downloaded to your work station.<br>
+```bash
+kubectl -n argocd create secret generic git-creds \
+  --from-literal=githubAppID=applicationid \
+  --from-literal=githubAppInstallationID=installationid \
+  --from-literal=githubAppPrivateKey='-----BEGIN RSA PRIVATE KEY-----PRIVATEKEYDATA-----END RSA PRIVATE KEY-----'
 ```
+This command creates "git-creds" secret in "argocd" namespace.
+<br><br>
 
-To stop the container in `docker` use Ctrl+C.
-
-### Docker Compose
-
-This deployment method will run the application on your local machine using `docker-compose`.
-
-Pre-requisites:
-
-- Docker installed locally
-
-Download the latest Docker Compose file and use `docker compose` to run the application containers:
-
+OPTIONAL (Accessing Argo CD ui):
+```bash
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
 ```
-wget https://github.com/aws-containers/retail-store-sample-app/releases/latest/download/docker-compose.yaml
-
-DB_PASSWORD='<some password>' docker compose --file docker-compose.yaml up
+This command will generate "argocd-initial-admin-secret". Copy the secret.
+```bash
+kubectl port-forward service/argocd-server 8080:80 -n argocd
 ```
+This command makes Argo CD ui accessible at http://localhost:8080.<br>
+To access Argo CD ui, go to http://localhost:8080. Enter "admin" in Username field and secret that you copied in Password field. Click "SIGN IN".
+<br><br>
 
-Open the frontend in a browser window:
-
+```bash
+kubectl apply -f ~/Desktop/swan_retail-store-sample-app/swan_kubernetes/swan_argocd/root-app.yaml
 ```
-http://localhost:8888
+This command creates "root" application, which will then create child resources.
+<br><br>
+
+Go to www.swanpyaetun.com to access the application.
+<br><br>
+
+```bash
+kubectl delete -f ~/Desktop/swan_retail-store-sample-app/swan_kubernetes/swan_argocd/root-app.yaml
 ```
+This command deletes Argo CD resources.
 
-To stop the containers in `docker compose` use Ctrl+C. To delete all the containers and related resources run:
+After Argo CD resources are deleted, wait for 1 minute. After 1 minute, Karpenter will terminate empty nodes. Check in AWS Management Console or use "kubectl get node" to make sure only system EKS node group nodes are left.
+<br><br>
 
-```
-docker compose -f docker-compose.yaml down
-```
+Run "Terraform Destroy" pipeline in [https://github.com/swanpyaetun/swan_eks-infrastructure-for-retail-store-sample-app](https://github.com/swanpyaetun/swan_eks-infrastructure-for-retail-store-sample-app) to destroy EKS infrastructure.
 
-### Kubernetes
+## 4. Additional Information
 
-This deployment method will run the application in an existing Kubernetes cluster.
+Terraform code for EKS infrastructure, and GitHub Actions CI/CD pipelines for Terraform: [https://github.com/swanpyaetun/swan_eks-infrastructure-for-retail-store-sample-app](https://github.com/swanpyaetun/swan_eks-infrastructure-for-retail-store-sample-app)
 
-Pre-requisites:
-
-- Kubernetes cluster
-- `kubectl` installed locally
-
-Use `kubectl` to run the application:
-
-```
-kubectl apply -f https://github.com/aws-containers/retail-store-sample-app/releases/latest/download/kubernetes.yaml
-kubectl wait --for=condition=available deployments --all
-```
-
-Get the URL for the frontend load balancer like so:
-
-```
-kubectl get svc ui
-```
-
-To remove the application use `kubectl` again:
-
-```
-kubectl delete -f https://github.com/aws-containers/retail-store-sample-app/releases/latest/download/kubernetes.yaml
-```
-
-### Terraform
-
-The following options are available to deploy the application using Terraform:
-
-| Name                                             | Description                                                                                                     |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| [Amazon EKS](./terraform/eks/default/)           | Deploys the application to Amazon EKS using other AWS services for dependencies, such as RDS, DynamoDB etc.     |
-| [Amazon EKS (Minimal)](./terraform/eks/minimal/) | Deploys the application to Amazon EKS using in-cluster dependencies instead of RDS, DynamoDB etc.               |
-| [Amazon ECS](./terraform/ecs/default/)           | Deploys the application to Amazon ECS using other AWS services for dependencies, such as RDS, DynamoDB etc.     |
-| [AWS App Runner](./terraform/apprunner/)         | Deploys the application to AWS App Runner using other AWS services for dependencies, such as RDS, DynamoDB etc. |
-
-## Security
-
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
-
-## License
-
-This project is licensed under the MIT-0 License.
-
-This package depends on and may incorporate or retrieve a number of third-party
-software packages (such as open source packages) at install-time or build-time
-or run-time ("External Dependencies"). The External Dependencies are subject to
-license terms that you must accept in order to use this package. If you do not
-accept all of the applicable license terms, you should not use this package. We
-recommend that you consult your company’s open source approval policy before
-proceeding.
-
-Provided below is a list of External Dependencies and the applicable license
-identification as indicated by the documentation associated with the External
-Dependencies as of Amazon's most recent review.
-
-THIS INFORMATION IS PROVIDED FOR CONVENIENCE ONLY. AMAZON DOES NOT PROMISE THAT
-THE LIST OR THE APPLICABLE TERMS AND CONDITIONS ARE COMPLETE, ACCURATE, OR
-UP-TO-DATE, AND AMAZON WILL HAVE NO LIABILITY FOR ANY INACCURACIES. YOU SHOULD
-CONSULT THE DOWNLOAD SITES FOR THE EXTERNAL DEPENDENCIES FOR THE MOST COMPLETE
-AND UP-TO-DATE LICENSING INFORMATION.
-
-YOUR USE OF THE EXTERNAL DEPENDENCIES IS AT YOUR SOLE RISK. IN NO EVENT WILL
-AMAZON BE LIABLE FOR ANY DAMAGES, INCLUDING WITHOUT LIMITATION ANY DIRECT,
-INDIRECT, CONSEQUENTIAL, SPECIAL, INCIDENTAL, OR PUNITIVE DAMAGES (INCLUDING
-FOR ANY LOSS OF GOODWILL, BUSINESS INTERRUPTION, LOST PROFITS OR DATA, OR
-COMPUTER FAILURE OR MALFUNCTION) ARISING FROM OR RELATING TO THE EXTERNAL
-DEPENDENCIES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, EVEN
-IF AMAZON HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. THESE LIMITATIONS
-AND DISCLAIMERS APPLY EXCEPT TO THE EXTENT PROHIBITED BY APPLICABLE LAW.
-
-MariaDB Community License - [LICENSE](https://mariadb.com/kb/en/mariadb-licenses/)
-MySQL Community Edition - [LICENSE](https://github.com/mysql/mysql-server/blob/8.0/LICENSE)
+This repository is a fork of [https://github.com/aws-containers/retail-store-sample-app](https://github.com/aws-containers/retail-store-sample-app).
