@@ -128,6 +128,7 @@ In "ui" Helm chart, there is an ingress called "ui". AWS Load Balancer Controlle
 <br><br>
 
 ![](../swan_images/traffic_flow.png)
+
 Network policies are created according to traffic flows in the diagram.
 
 Application is secured by implementing the following practices:
